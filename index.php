@@ -4,26 +4,35 @@ if (isset($_GET['lunghezza_password'])) {
   $lunghezza = intval($_GET['lunghezza_password']);
   
   // Crea un array con i caratteri da utilizzare per generare la password
-  $caratteri = array(
-    "abcdefghijklmnopqrstuvwxyz",
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-    "0123456789",
-    "!@#$%^&*()"
-  );
+  $caratteri = "";
+  if (in_array("numero", $_GET['caratteri'])) {
+    $caratteri .= "0123456789";
+  }
+  if (in_array("lettera", $_GET['caratteri'])) {
+    $caratteri .= "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  }
+  if (in_array("simbolo", $_GET['caratteri'])) {
+    $caratteri .= "!@#$%^&*()_+-=";
+  }
   
   $password = "";
   
-  // Aggiunge caratteri casuali allapassword fino a raggiungere la lunghezza desiderata
+  // Aggiunge caratteri casuali alla password fino a raggiungere la lunghezza desiderata
+  $ripetizione = isset($_GET['ripetizione']);
   while (strlen($password) < $lunghezza) {
-    $categoria = array_rand($caratteri);
-    $carattere = substr($caratteri[$categoria], rand(0, strlen($caratteri[$categoria])-1), 1);
+    $carattere = substr($caratteri, rand(0, strlen($caratteri)-1), 1);
+    if (!$ripetizione && strpos($password, $carattere) !== false) {
+      // Se non si consente la ripetizione di caratteri e il carattere è già presente nella password, passa al prossimo carattere
+      continue;
+    }
     $password .= $carattere;
   }
   
-  // Restituisce la password generata all'utente
-  echo "La password generata è: " . $password;
+  // Restituisce la password all'utente
+  echo "La tua password è: " . $password;
 } else {
-  echo "La lunghezza della password non è stata fornita.";
+  // Se la lunghezza della password non è stata fornita, mostra un messaggio di errore
+  echo "Errore: La lunghezza della password non è stata fornita.";
 }
 ?>
 
@@ -55,9 +64,11 @@ if (isset($_GET['lunghezza_password'])) {
         </div>
     </header>
 
-     <main>
+    <main>
         <div class="container">
-            <div class="password">
+            <!--   <div class="password">
+
+
                 <form method="get">
                     <label for="lunghezza_password">Lunghezza Password:</label>
                     <input type="number" id="lunghezza_password" name="lunghezza_password" min="8" max="20" required>
@@ -89,10 +100,27 @@ if (isset($_GET['lunghezza_password'])) {
                         <label for="simbols">Simboli</label>
                     </div>
                 </form>
-            </div>
+            </div> -->
         </div>
+        <form  method="get">
+            <label for="lunghezza_password">Lunghezza Password:</label>
+            <input type="number" id="lunghezza_password" name="lunghezza_password" min="8" max="20" required>
+            <br>
+            <label for="caratteri">Caratteri:</label>
+            <select id="caratteri" name="caratteri[]" multiple required>
+                <option value="numero">Numeri</option>
+                <option value="lettera">Lettere</option>
+                <option value="simbolo">Simboli</option>
+            </select>
+            <br>
+            <input type="checkbox" id="ripetizione" name="ripetizione">
+            <label for="ripetizione">Consenti ripetizione di caratteri</label>
+            <br>
+            <button type="submit">Genera Password</button>
+        </form>
 
-    </main> 
+
+    </main>
 
 
 
